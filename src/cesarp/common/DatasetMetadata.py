@@ -40,7 +40,7 @@ class DatasetMetadata:
         if config_entries is None:
             config_entries = {}
         self.CONFIG_ENTRIES = config_entries
-        self.VERSION_INFO = get_version_info()
+        # self.VERSION_INFO = get_version_info()
 
     def get_as_dict(self):
         return self.__dict__
