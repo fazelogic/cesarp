@@ -98,3 +98,5 @@ ENV/
 # mypy
 .mypy_cache/
 debug_fid6/fid_6.idf
+/random_idf_generator/Random_BuildingInformation.csv
+/random_idf_generator/Random_SiteVertices.csv
