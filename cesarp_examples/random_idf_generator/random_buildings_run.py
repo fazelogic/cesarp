@@ -42,11 +42,11 @@ if __name__ == "__main__":
         __abs_path("logging.conf")
     )  # this logging config is only for the main process, workers log to separate log files which go into a folder, configured in SimulationManager.
 
-    main_config_path = __abs_path("simple_main_config.yml")
+    main_config_path = __abs_path("random_buildings_config.yml")
     output_dir = __abs_path("./results/example")
     shutil.rmtree(output_dir, ignore_errors=True)
 
-    fids_to_use = None #[1, 2, 3]  # set to None to simulate all buildings
+    fids_to_use = None # [1, 2, 3]  # set to None to simulate all buildings
     sim_manager = SimulationManager(output_dir, main_config_path, cesarp.common.init_unit_registry(), fids_to_use=fids_to_use)
     sim_manager.run_all_steps()
 

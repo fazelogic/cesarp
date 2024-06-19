@@ -2,8 +2,19 @@
 
 import random
 import pandas as pd
-from shapely.geometry import box
+from shapely.geometry import box, Polygon
 from shapely.affinity import rotate, translate
+
+
+def is_clockwise(coords):
+    """ Check if the coordinates are listed in counter-clockwise order. """
+    s = 0
+    n = len(coords)
+    for i in range(n):
+        x0, y0 = coords[i]
+        x1, y1 = coords[(i + 1) % n]
+        s += (x1 - x0) * (y1 + y0)
+    return s < 0
 
 
 def generate_centered_buildings_in_grid(grid_root, block_size, min_building_size, max_building_size,
@@ -36,8 +47,16 @@ def generate_centered_buildings_in_grid(grid_root, block_size, min_building_size
             rotated_rect = rotate(rect, angle, origin='center', use_radians=False)
             final_rect = translate(rotated_rect, xoff=center_x, yoff=center_y)
 
+            # Get the coordinates, ensuring they are clockwise
+            vertices = list(final_rect.exterior.coords[:-1])  # Remove the closing vertex
+
+            # Make the vertices clockwise
+            vertices.reverse()  # Reverse to make them clockwise
+
+
+            vertices.append(vertices[0])  # Close the loop by repeating the first vertex
+
             # Store the vertices in the list, including closing the loop by repeating the first vertex at the end
-            vertices = list(final_rect.exterior.coords)
             for vx, vy in vertices:
                 building_data.append({
                     "TARGET_FID": i * grid_root + j + 1,

@@ -32,8 +32,10 @@ from pathlib import Path
 import os
 
 if __name__ == "__main__":
-    IDF.setiddname("C:/EnergyPlusV9-3-0/Energy+.idd")  # make sure to set IDD matching your IDF
-    base = os.path.dirname(__file__) / Path("..") / Path("simple_example") / Path("results") / Path("example") / Path("idfs")
+    IDF.setiddname("/usr/local/EnergyPlus-9-5-0/Energy+.idd")  # make sure to set IDD matching your IDF
+    base = (os.path.dirname(__file__) / Path("..") / Path("random_idf_generator") / Path("results") / Path("example") /
+            Path(
+        "idfs"))
     idf_path = f"{base}/fid_2.idf"
     dest_path = f"{base}/fid_2.obj"
     idf = IDF(idf_path)
