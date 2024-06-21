@@ -67,7 +67,7 @@ def add_people(idf, zone_idf_name, occupancy: Occupancy, fraction_radiant_from_a
                                                                          type_limit=cesarp.common.ScheduleTypeLimits.ANY())  #
     # cesarp.common.ScheduleTypeLimits.FRACTION()
     activity_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, 100,
-                                                                        type_limit='ANY')  # ureg.W / ureg.person
+                                                                        type_limit=ureg.W / ureg.person)  # ureg.W / ureg.person
     people_idf_obj = idf.newidfobject(idf_strings.IDFObjects.people)
     people_idf_obj.Name = idf_strings.CustomObjNames.people.format(zone_idf_name)
     people_idf_obj.Zone_or_ZoneList_Name = zone_idf_name

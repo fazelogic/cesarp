@@ -14,5 +14,10 @@ def generate_simple_building_info(sample_size):
     building_info_df = pd.DataFrame(index, columns=['ORIG_FID'])
     building_info_df['SIA2024BuildingType'] = random.choice(["SFH", "MFH"])
     building_info_df['BuildingAge'] = np.random.randint(1900, 2020, size=sample_size, dtype=int)
+    # building_info_df['LastRetrofit'] = building_info_df['BuildingAge']
+    # building_info_df['GroundFloorArea'] = np.nan
+    # building_info_df['ECarrierHeating'] = 2
+    # building_info_df['ECarrierDHW'] = 2
+    building_info_df['GlazingRatio'] = np.random.randint(10, 60, size=sample_size, dtype=int)
     building_info_df.to_csv('data/Random_BuildingInformation.csv', index=False)
-
+    print(building_info_df)

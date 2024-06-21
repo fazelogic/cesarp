@@ -251,6 +251,7 @@ class SimulationManager:
             )
             for fid_batch in fid_batches
         ]
+        # getattr(job_res_list)
         result_per_worker = [res.get() for res in job_res_list]
 
         all_per_bldg_info_used = pd.DataFrame()
