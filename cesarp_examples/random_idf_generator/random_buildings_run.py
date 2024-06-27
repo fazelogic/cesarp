@@ -24,10 +24,14 @@ import os
 import shutil
 from pathlib import Path
 
+import pandas as pd
+import numpy as np
+
 import cesarp.common
 import cesarp.common.config_loader
 from cesarp.manager.SimulationManager import SimulationManager
-from cesarp.eplus_adapter.eplus_eso_results_handling import RES_KEY_DHW_DEMAND, RES_KEY_HEATING_DEMAND
+from cesarp.eplus_adapter.eplus_eso_results_handling import (RES_KEY_EL_DEMAND, RES_KEY_HEATING_DEMAND,
+                                                             RES_KEY_INDOOR_TEMPERATURE)
 from cesarp.eplus_adapter.idf_strings import ResultsFrequency
 
 
@@ -50,11 +54,18 @@ if __name__ == "__main__":
     sim_manager = SimulationManager(output_dir, main_config_path, cesarp.common.init_unit_registry(), fids_to_use=fids_to_use)
     sim_manager.run_all_steps()
 
-    # if you need different result parameters, you have to make sure that energy plus reports them. Do so by using the configuration parameters from eplus_adapter package, namely
-    # "OUTPUR_METER" and "OUTPUT_VARS", see cesarp.eplus_adapter.default_config.yml. You can overwrite those parameters in your project config, in this example that would be simle_main_config.yml.
+    # if you need different result parameters, you have to make sure that EnergyPlus reports them. Do so by using the
+    # configuration parameters from eplus_adapter package, namely "OUTPUR_METER" and "OUTPUT_VARS",
+    # see cesarp.eplus_adapter.default_config.yml. You can overwrite those parameters in your project config,
+    # in this example that would be simle_main_config.yml.
     # Also make sure that the reporting frequency in the configuration and in the collect_custom_results() call match.
-    result_series_frame = sim_manager.collect_custom_results(result_keys=[RES_KEY_HEATING_DEMAND, RES_KEY_DHW_DEMAND], results_frequency=ResultsFrequency.HOURLY)
+    result_series_frame = sim_manager.collect_custom_results(result_keys=[RES_KEY_HEATING_DEMAND, RES_KEY_EL_DEMAND, RES_KEY_INDOOR_TEMPERATURE
+                                                                          ], results_frequency=ResultsFrequency.HOURLY)
     # you can postprocess the results as you like, e.g. save to a file
+    num_fids = result_series_frame['fid'].max()
+    for fids in range(1, num_fids):
+        sub_results = result_series_frame[result_series_frame['fid'] == fids]
+        sub_results = pd.DataFrame(sub_results.iloc[:, 2].values.reshape(-1, 8760), columns=np.arange(1, 8761)).transpose()
     result_series_frame.to_csv(__abs_path(output_dir) / Path("hourly_results.csv"))
 
     # zip_path = sim_manager.save_to_zip(main_script_path=__file__)

@@ -44,8 +44,9 @@ RES_KEY_HEATING_DEMAND = "DistrictHeating:HVAC"
 RES_KEY_DHW_DEMAND = "DistrictHeating:Building"
 RES_KEY_EL_DEMAND = "Electricity:Facility"
 RES_KEY_COOLING_DEMAND = "DistrictCooling:Facility"
+RES_KEY_INDOOR_TEMPERATURE = 'Zone Air Temperature'
 
-_CESAR_SIMULATION_RESULT = [RES_KEY_HEATING_DEMAND, RES_KEY_DHW_DEMAND, RES_KEY_EL_DEMAND, RES_KEY_COOLING_DEMAND]
+_CESAR_SIMULATION_RESULT = [RES_KEY_HEATING_DEMAND, RES_KEY_DHW_DEMAND, RES_KEY_EL_DEMAND, RES_KEY_COOLING_DEMAND, RES_KEY_INDOOR_TEMPERATURE]
 
 
 def check_cesar_results_are_enabled(custom_config: Optional[Dict[str, Any]] = None) -> bool:
@@ -138,13 +139,23 @@ def collect_multi_params_for_site(result_folders: Mapping[int, str], result_keys
                 if not vars_matching:
                     logging.getLogger(__name__).warning(f"{result_key} not found in {eso_path}. Skipping.")
                     continue
-                (data, unit) = __get_data_series_with_unit(eso, vars_matching[0])
-                res = pd.DataFrame(data, columns=["value"])
-                res["fid"] = fid
-                res["unit"] = unit
-                res["var"] = result_key
-                aggregated_res = pd.concat([aggregated_res, res], sort=False)
-                aggregated_res.index.name = "timing"
+                if vars_matching[0][2] == 'Zone Air Temperature':
+                    for zone_air_temperature in range(len(vars_matching)):
+                        (data, unit) = __get_data_series_with_unit(eso, vars_matching[zone_air_temperature])
+                        res = pd.DataFrame(data, columns=["value"])
+                        res["fid"] = fid
+                        res["unit"] = unit
+                        res["var"] = result_key
+                        aggregated_res = pd.concat([aggregated_res, res], sort=False)
+                        aggregated_res.index.name = "timing"
+                else:
+                    (data, unit) = __get_data_series_with_unit(eso, vars_matching[0])
+                    res = pd.DataFrame(data, columns=["value"])
+                    res["fid"] = fid
+                    res["unit"] = unit
+                    res["var"] = result_key
+                    aggregated_res = pd.concat([aggregated_res, res], sort=False)
+                    aggregated_res.index.name = "timing"
             except Exception as msg:
                 logging.getLogger(__name__).warning(f"Variable {result_key} could not be extracted from {eso_path}. Skipping this variable. Caused by: {msg}")
                 continue

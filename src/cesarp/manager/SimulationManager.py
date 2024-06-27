@@ -442,7 +442,7 @@ class SimulationManager:
     def collect_custom_results(self, result_keys: Sequence, results_frequency: ResultsFrequency) -> pd.DataFrame:
         """
         Process EnergyPlus output of all the simulated buildings. You can specify which parameters should be collected and the frequency (e.g. ANNUAL, HOURLY).
-        If you need to get two parameters and they have different frequencies, you need to call the method twice.
+        If you need to get two parameters, and they have different frequencies, you need to call the method twice.
         Make sure you add the result parameters you want to be able to collect in the correct frequency in your YML config according to cesarp.eplus_adapter.default_config.yml
 
         :param result_keys: list of EnergyPlus result parameters which should be collected
