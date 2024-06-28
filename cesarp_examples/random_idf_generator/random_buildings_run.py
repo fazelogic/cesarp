@@ -50,7 +50,7 @@ if __name__ == "__main__":
     output_dir = __abs_path("./results/example")
     shutil.rmtree(output_dir, ignore_errors=True)
 
-    fids_to_use = None # [1, 2, 3]  # set to None to simulate all buildings
+    fids_to_use = None  # None or [1, 2, 3]  -> set to None to simulate all buildings
     sim_manager = SimulationManager(output_dir, main_config_path, cesarp.common.init_unit_registry(), fids_to_use=fids_to_use)
     sim_manager.run_all_steps()
 

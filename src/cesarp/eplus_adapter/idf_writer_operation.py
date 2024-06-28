@@ -63,11 +63,11 @@ def add_passive_cooling(idf, zone_idf_name, windows_in_zone: List[EpBunch], bldg
 
 
 def add_people(idf, zone_idf_name, occupancy: Occupancy, fraction_radiant_from_activity: pint.Quantity, ureg):
-    occupancy_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, 100,
-                                                                         type_limit=cesarp.common.ScheduleTypeLimits.ANY())  #
+    occupancy_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, .47,
+                                                                         type_limit=cesarp.common.ScheduleTypeLimits.FRACTION())  #
     # cesarp.common.ScheduleTypeLimits.FRACTION()
-    activity_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, 100,
-                                                                        type_limit=ureg.W / ureg.person)  # ureg.W / ureg.person
+    activity_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, 125.28,
+                                                                        type_limit=cesarp.common.ScheduleTypeLimits.ANY())  # ureg.W / ureg.person
     people_idf_obj = idf.newidfobject(idf_strings.IDFObjects.people)
     people_idf_obj.Name = idf_strings.CustomObjNames.people.format(zone_idf_name)
     people_idf_obj.Zone_or_ZoneList_Name = zone_idf_name
@@ -80,7 +80,7 @@ def add_people(idf, zone_idf_name, occupancy: Occupancy, fraction_radiant_from_a
 
 def add_lights(idf, zone_idf_name, lighting_op: InstallationOperation,
                lighting_characteristics: LightingCharacteristics, ureg):
-    lighting_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, .5,
+    lighting_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, .33,
                                                                type_limit=cesarp.common.ScheduleTypeLimits.FRACTION())
     lights_idf_obj = idf.newidfobject(idf_strings.IDFObjects.ligths)
     lights_idf_obj.Name = idf_strings.CustomObjNames.lights.format(zone_idf_name)
@@ -94,7 +94,7 @@ def add_lights(idf, zone_idf_name, lighting_op: InstallationOperation,
 
 
 def add_hot_water_equipment(idf, zone_idf_name, dhw_op: InstallationOperation, dhw_fraction_lost: pint.Quantity, ureg):
-    dhw_schedule_idf_name = idf_writing_helpers.add_constant_schedule(idf, .5,
+    dhw_schedule_idf_name = idf_writing_helpers.add_constant_schedule(idf, .2,
                                                              type_limit=cesarp.common.ScheduleTypeLimits.FRACTION())
     hot_water_equ_idf_obj = idf.newidfobject(idf_strings.IDFObjects.hot_water_equipment)
     hot_water_equ_idf_obj.Name = idf_strings.CustomObjNames.hot_water_equipment.format(zone_idf_name)
@@ -107,7 +107,7 @@ def add_hot_water_equipment(idf, zone_idf_name, dhw_op: InstallationOperation, d
 
 def add_electric_equipment(idf, zone_idf_name, el_app_op: InstallationOperation, el_app_fraction_radiant: pint.Quantity,
                            ureg):
-    applicance_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, .5,
+    applicance_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, .21,
                                                                  type_limit=cesarp.common.ScheduleTypeLimits.FRACTION())
     el_equ_idf_obj = idf.newidfobject(idf_strings.IDFObjects.electric_equipment)
     el_equ_idf_obj.Name = idf_strings.CustomObjNames.electric_equipment.format(zone_idf_name)
@@ -134,7 +134,7 @@ def add_HVAC_template(idf, zone_idf_name, hvac: HVACOperation, name_prefix: str,
 
 def add_outdoor_air_sepc(idf, ventilation_schedule, outdoor_air_flow_per_floor_area: pint.Quantity, name_prefix: str,
                          ureg):
-    ventilation_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, .0001,
+    ventilation_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, .3,
                                                                   type_limit=cesarp.common.ScheduleTypeLimits.FRACTION())
     idf_obj_type = idf_strings.IDFObjects.design_specifictaion_outdoor_air
     name = name_prefix + "_" + idf_strings.CustomObjNames.outdoor_air_spec
@@ -157,9 +157,9 @@ def add_outdoor_air_sepc(idf, ventilation_schedule, outdoor_air_flow_per_floor_a
 def add_thermostat_template(idf, heating_setpoint_schedule, cooling_setpoint_schedule, name_prefix: str):
     # calling add_schedule before checking if the thremostat template already exists only to have the schedule name to create thermostat template idf name,
     # which must be different in case different schedules for different zones shall be used...
-    heating_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, 19,
+    heating_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, 18.88,
                                                               type_limit=cesarp.common.ScheduleTypeLimits.TEMPERATURE())
-    cooling_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, 27,
+    cooling_sched_idf_name = idf_writing_helpers.add_constant_schedule(idf, 27.83,
                                                               type_limit=cesarp.common.ScheduleTypeLimits.TEMPERATURE())
     name = name_prefix + "_" + idf_strings.CustomObjNames.thermostat_template
     idf_obj_type = idf_strings.IDFObjects.hvac_template_thermostat
@@ -177,7 +177,7 @@ def add_zone_infiltration(idf, zone_idf_obj_name, infiltration_rate, infiltratio
     infiltration_idf_obj = idf.newidfobject(idf_strings.IDFObjects.zone_infiltration_design_flow_rate)
     infiltration_idf_obj.Name = idf_strings.CustomObjNames.zone_infiltration.format(zone_idf_obj_name)
     infiltration_idf_obj.Zone_or_ZoneList_Name = zone_idf_obj_name
-    infiltration_schedule_name = idf_writing_helpers.add_constant_schedule(idf, .2,
+    infiltration_schedule_name = idf_writing_helpers.add_constant_schedule(idf, .99,
                                                                   type_limit=cesarp.common.ScheduleTypeLimits.FRACTION())
     infiltration_idf_obj.Schedule_Name = infiltration_schedule_name
     try:
