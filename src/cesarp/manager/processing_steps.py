@@ -126,9 +126,11 @@ def bldg_model_to_idf_no_exception(bldg_model, idf_file_path, profiles_files_han
     try:
         logger.info(f"create idf and get weather file for building fid {bldg_model.fid}, {idf_file_path}")
         my_idf_writer = CesarIDFWriter(idf_file_path, unit_reg, profiles_files_handler, custom_config=custom_config)
-        my_idf_writer_custom = CesarIDFWriterCustom(f'{idf_file_path}_custom.idf', unit_reg,
-                                                   profiles_files_handler,
-                                              custom_config=custom_config)
+        temp_directory, temp_idf = os.path.split(idf_file_path)
+        new_directory = os.path.join(temp_directory, "truncated_idfs")
+        new_idf_file_path = os.path.join(new_directory, temp_idf)
+        my_idf_writer_custom = CesarIDFWriterCustom(new_idf_file_path, unit_reg, profiles_files_handler,
+                                                    custom_config=custom_config)
         my_idf_writer.write_bldg_model(bldg_model)
         my_idf_writer_custom.write_bldg_model(bldg_model)
         return (True, idf_file_path, bldg_model.site.weather_file_path)

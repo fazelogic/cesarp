@@ -20,4 +20,4 @@ def generate_simple_building_info(sample_size):
     # building_info_df['ECarrierDHW'] = 2
     building_info_df['GlazingRatio'] = np.random.randint(10, 60, size=sample_size, dtype=int)
     building_info_df.to_csv('data/Random_BuildingInformation.csv', index=False)
-    print(building_info_df)
+    # print(building_info_df)

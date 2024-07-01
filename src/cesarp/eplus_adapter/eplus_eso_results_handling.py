@@ -24,6 +24,7 @@ Module providing functions to read and aggregate results of several buildings.
 import logging
 import esoreader
 import pandas as pd
+import numpy as np
 import pint
 from typing import Mapping, Sequence, Dict, Any, Optional
 from pathlib import Path
@@ -46,7 +47,8 @@ RES_KEY_EL_DEMAND = "Electricity:Facility"
 RES_KEY_COOLING_DEMAND = "DistrictCooling:Facility"
 RES_KEY_INDOOR_TEMPERATURE = 'Zone Air Temperature'
 
-_CESAR_SIMULATION_RESULT = [RES_KEY_HEATING_DEMAND, RES_KEY_DHW_DEMAND, RES_KEY_EL_DEMAND, RES_KEY_COOLING_DEMAND, RES_KEY_INDOOR_TEMPERATURE]
+_CESAR_SIMULATION_RESULT = [RES_KEY_HEATING_DEMAND, RES_KEY_DHW_DEMAND, RES_KEY_EL_DEMAND, RES_KEY_COOLING_DEMAND,
+                            RES_KEY_INDOOR_TEMPERATURE]
 
 
 def check_cesar_results_are_enabled(custom_config: Optional[Dict[str, Any]] = None) -> bool:
@@ -69,7 +71,8 @@ def collect_cesar_simulation_summary(result_folder, ureg: pint.UnitRegistry) -> 
     return sim_res
 
 
-def _cesar_summary_one_bldg_annual(single_result_folder: str, res_param_keys, ureg: pint.UnitRegistry) -> Dict[str, pint.Quantity]:
+def _cesar_summary_one_bldg_annual(single_result_folder: str, res_param_keys, ureg: pint.UnitRegistry) -> Dict[
+    str, pint.Quantity]:
     """
     Quite tailered function to assemble yearly results for one building. It should replicate the result summary excel file known from the cesar Matlab version.
     All energies (Unit J) are reported by square meter, which is done by dividing the per building demand by the total floor area.
@@ -98,7 +101,8 @@ def _cesar_summary_one_bldg_annual(single_result_folder: str, res_param_keys, ur
     return res
 
 
-def collect_multi_params_for_site(result_folders: Mapping[int, str], result_keys: Sequence, results_frequency: ResultsFrequency) -> pd.DataFrame:
+def save_multi_params_for_site(result_folders: Mapping[int, str], result_keys: Sequence, results_frequency:
+ResultsFrequency, save_folder_path) -> pd.DataFrame:
     """
     Returns data in a flat pandas DataFrame. Index is sequence from 0..n, columns are timing, fid, var (variable name), value, unit.
     You can import this data series e.g. into Excel and create a pivot table to analyze the data.
@@ -115,14 +119,15 @@ def collect_multi_params_for_site(result_folders: Mapping[int, str], result_keys
         Select all results for timestep 3 (if hourly that would be hour 4) - result is a series
         `res_tbl.loc[3]`
 
+    :param save_folder_path: 
     :param result_folders: folders containing result files, one eso file named eplusout.eso is expected per folder
     :param result_keys: List of names of the result parameters to get. Parameter name has to point to unique result, e.g. DistrictHeating:HVAC (not only DistrictHeating).
     :param results_frequency: Time steps of results, e.g. RunPeriod, Hourly
     :return: pandas.DataFrame with MulitIndex, Level 0 fid, Level 1 result key
     """
 
-    aggregated_res = pd.DataFrame(columns=["fid", "var", "value", "unit"])
     for fid, single_result_folder in result_folders.items():
+        aggregated_res = pd.DataFrame(columns=["fid", "var", "value", "unit"])
         try:
             eso_path = single_result_folder / Path(_ESO_FILE_NAME)
             logging.getLogger(__name__).debug(f"Open {eso_path}")
@@ -157,12 +162,82 @@ def collect_multi_params_for_site(result_folders: Mapping[int, str], result_keys
                     aggregated_res = pd.concat([aggregated_res, res], sort=False)
                     aggregated_res.index.name = "timing"
             except Exception as msg:
-                logging.getLogger(__name__).warning(f"Variable {result_key} could not be extracted from {eso_path}. Skipping this variable. Caused by: {msg}")
+                logging.getLogger(__name__).warning(
+                    f"Variable {result_key} could not be extracted from {eso_path}. Skipping this variable. Caused by: {msg}")
+                continue
+        aggregated_res = pd.DataFrame(aggregated_res.iloc[:, 2].values.reshape(-1, 8760), columns=np.arange(1, 8761)).transpose()
+        aggregated_res.iloc[:, :2] = aggregated_res.iloc[:, :2] / 3600000
+        aggregated_res.to_csv(save_folder_path / Path(f"fid_{fid}.csv"), header=False, index=False)
+
+
+def collect_multi_params_for_site(result_folders: Mapping[int, str], result_keys: Sequence,
+                                  results_frequency: ResultsFrequency) -> pd.DataFrame:
+    """
+    Returns data in a flat pandas DataFrame. Index is sequence from 0..n, columns are timing, fid, var (variable name), value, unit.
+    You can import this data series e.g. into Excel and create a pivot table to analyze the data.
+
+    To convert the result to a mutli-indexed DataFrame, do:
+        `res_mi = res_df.set_index(["fid", "var", "unit"], append=True)`
+    if you further want to convert the row-multiindex to column-multiindex, do:
+        `res_tbl = res_mi.unstack(["fid", "var", "unit"])`
+    To select data from the res_tbl with columns mutli-index, do:
+        Select all results for certain fid:
+            `fid_res = res_tbl.xs(1, level="fid", axis=1)`
+        To remove the unit header do:
+            `fid_res.columns = fid_res.columns.droplevel("unit")`
+        Select all results for timestep 3 (if hourly that would be hour 4) - result is a series
+        `res_tbl.loc[3]`
+
+    :param result_folders: folders containing result files, one eso file named eplusout.eso is expected per folder
+    :param result_keys: List of names of the result parameters to get. Parameter name has to point to unique result, e.g. DistrictHeating:HVAC (not only DistrictHeating).
+    :param results_frequency: Time steps of results, e.g. RunPeriod, Hourly
+    :return: pandas.DataFrame with MulitIndex, Level 0 fid, Level 1 result key
+    """
+
+    for fid, single_result_folder in result_folders.items():
+        aggregated_res = pd.DataFrame(columns=["fid", "var", "value", "unit"])
+        try:
+            eso_path = single_result_folder / Path(_ESO_FILE_NAME)
+            logging.getLogger(__name__).debug(f"Open {eso_path}")
+            eso = esoreader.read_from_path(eso_path)
+        except FileNotFoundError:
+            logging.getLogger(__name__).warning(f"No {eso_path} not found. Skipping.")
+            continue
+        except Exception as msg:
+            logging.getLogger(__name__).warning(f"Malformed eso {eso_path}. Skipping. Caused by: {msg}")
+            continue
+        for result_key in result_keys:
+            try:
+                vars_matching = eso.find_variable(result_key, frequency=results_frequency.value)
+                if not vars_matching:
+                    logging.getLogger(__name__).warning(f"{result_key} not found in {eso_path}. Skipping.")
+                    continue
+                if vars_matching[0][2] == 'Zone Air Temperature':
+                    for zone_air_temperature in range(len(vars_matching)):
+                        (data, unit) = __get_data_series_with_unit(eso, vars_matching[zone_air_temperature])
+                        res = pd.DataFrame(data, columns=["value"])
+                        res["fid"] = fid
+                        res["unit"] = unit
+                        res["var"] = result_key
+                        aggregated_res = pd.concat([aggregated_res, res], sort=False)
+                        aggregated_res.index.name = "timing"
+                else:
+                    (data, unit) = __get_data_series_with_unit(eso, vars_matching[0])
+                    res = pd.DataFrame(data, columns=["value"])
+                    res["fid"] = fid
+                    res["unit"] = unit
+                    res["var"] = result_key
+                    aggregated_res = pd.concat([aggregated_res, res], sort=False)
+                    aggregated_res.index.name = "timing"
+            except Exception as msg:
+                logging.getLogger(__name__).warning(
+                    f"Variable {result_key} could not be extracted from {eso_path}. Skipping this variable. Caused by: {msg}")
                 continue
     return aggregated_res
 
 
-def collect_single_param_for_site(result_folders: Mapping[int, str], result_key, results_frequency: ResultsFrequency) -> pd.DataFrame:
+def collect_single_param_for_site(result_folders: Mapping[int, str], result_key,
+                                  results_frequency: ResultsFrequency) -> pd.DataFrame:
     """
     Get one result parameter for all buildings in a flat table structure.
 
@@ -176,7 +251,6 @@ def collect_single_param_for_site(result_folders: Mapping[int, str], result_key,
 
 
 def collect_multi_entry_annual_result(single_result_folder: str, var_name: str):
-
     eso = esoreader.read_from_path(single_result_folder / Path(_ESO_FILE_NAME))
 
     variable_instances = eso.dd.find_variable(var_name)

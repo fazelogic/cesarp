@@ -1,5 +1,5 @@
 MANAGER:
-    NR_OF_PARALLEL_WORKERS: -1  # -1 means half of the available processors will be used
+    NR_OF_PARALLEL_WORKERS: 30  # -1 means half of the available processors will be used
     SITE_VERTICES_FILE:
         PATH: "../random_idf_generator/data/Random_SiteVertices.csv"
         SEPARATOR: ","

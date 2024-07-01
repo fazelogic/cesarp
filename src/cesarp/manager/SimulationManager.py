@@ -222,7 +222,7 @@ class SimulationManager:
             self.create_IDFs()
             self.run_simulations()
             self.process_results()
-            self.save_bldg_containers()
+            # self.save_bldg_containers()
             self.save_summary_result()
         except Exception as e:
             self.save_bldg_containers()
@@ -438,6 +438,38 @@ class SimulationManager:
             )
 
         return all_results
+
+    def save_custom_results(self, result_keys: Sequence, results_frequency: ResultsFrequency, save_folder_path=None) ->pd.DataFrame:
+        """
+        Process EnergyPlus output of all the simulated buildings. You can specify which parameters should be
+        collected and the frequency (e.g. ANNUAL, HOURLY).
+        If you need to get two parameters, and they have different frequencies, you need to call the method twice.
+        Make sure you add the result parameters you want to be able to collect in the correct frequency in your YML
+        config according to cesarp.eplus_adapter.default_config.yml
+
+        :param save_folder_path:
+        :param result_keys: list of EnergyPlus result parameters which should be collected
+        :param results_frequency: frequency of the result parameter
+        :return: pandas DataFrame, index/rows beeing the time index, e.g. hour if frequency is HOURLY, columns are a
+        multiindex consisting of building fid, parameter name, unit
+        """
+        worker_pool = self._get_worker_pool()
+        fid_batches = define_fid_batches(list(self.output_folders.keys()), worker_pool._processes)
+        job_res_list = [
+            self._get_worker_pool().apply_async(
+                cesarp.eplus_adapter.eplus_eso_results_handling.save_multi_params_for_site,
+                (
+                    {fid: output_folder for fid, output_folder in self.output_folders.items() if fid in fid_batch},
+                    result_keys,
+                    results_frequency,
+                    save_folder_path
+                ),
+                error_callback=processing_steps.log_error,
+            )
+            for fid_batch in fid_batches
+        ]
+
+        per_batch_summary = [res.get() for res in job_res_list]
 
     def collect_custom_results(self, result_keys: Sequence, results_frequency: ResultsFrequency) -> pd.DataFrame:
         """
