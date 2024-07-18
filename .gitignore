@@ -138,3 +138,7 @@ generated_result
 /.idea/misc.xml
 .vscode/launch.json
 .vscode/settings.json
+/cesarp_examples/random_idf_generator/test_save.py
+/cesarp_examples/random_idf_generator/first_column_plots2.png
+/cesarp_examples/random_idf_generator/first_column_plots1.png
+/cesarp_examples/random_idf_generator/first_column_plots0.png

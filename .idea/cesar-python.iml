@@ -5,6 +5,10 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/cesarp_examples/random_idf_generator/results/example" />
+      <excludeFolder url="file://$MODULE_DIR$/cesarp_examples/random_idf_generator/20240701_1739-cesarp-logs" />
+      <excludeFolder url="file://$MODULE_DIR$/cesarp_examples/random_idf_generator/results" />
+      <excludeFolder url="file://$MODULE_DIR$/cesarp_examples/simple_example/20240627_1749-cesarp-logs" />
+      <excludeFolder url="file://$MODULE_DIR$/cesarp_examples/simple_example/results" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.8 (cesarp)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -13,13 +13,13 @@ def __abs_path(path):
 dfs = []
 
 # Iterate over the files
-for i in range(1, 10):
+for i in range(1, 100):
     file_name = __abs_path(f"./results/example/EPF_inputs/fid_{i}.csv")
     df = pd.read_csv(file_name, header=None)  # Assuming no header in the CSV files
     dfs.append(df)
 
 # Extracting and plotting the first column from each DataFrame
-plt.figure(figsize=(10, 6))  # Adjust the figure size as needed
+plt.figure(figsize=(20, 12), dpi=300)  # Adjust the figure size as needed
 
 for i, df in enumerate(dfs):
     plt.plot(df.iloc[:, 2], label=f"idf_{i+1}")

@@ -86,7 +86,7 @@ if __name__ == "__main__":
     save_dir = __abs_path("./results/example/EPF_inputs")
     shutil.rmtree(output_dir, ignore_errors=True)
     create_directory_if_not_exists(truncated_dir)
-    sample_size = 10000
+    sample_size = 100000
 
     initiate_random_samples(sample_size)
 
