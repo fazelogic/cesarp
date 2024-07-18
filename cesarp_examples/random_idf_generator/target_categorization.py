@@ -128,6 +128,7 @@ def main(input_csv, output_csv):
     print(max(elongation_bin))
     results = [(x[0], x[1], x[2], elongation_bin) for x, elongation_bin in zip(results, elongation_bin)]
 
+
     # Write results to CSV
     write_to_csv(results, output_csv)
 
