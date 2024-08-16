@@ -17,3 +17,5 @@ types-PyYAML==5.4.3
 types-six==0.1.7
 requests==2.27.0
 types-requests==2.26.2
+scikit_learn==1.3.2
+PyQt5==5.15.11
