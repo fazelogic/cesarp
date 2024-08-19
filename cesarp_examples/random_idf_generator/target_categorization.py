@@ -75,28 +75,34 @@ def compute_orientation_from_edge(longest_edge):
     return angle_degrees, orientation_category
 
 
-def digitize_area(area):
-    area = np.array(area)
-    num_bins = 7
-    # Calculate bin edges
-    bin_edges = np.linspace(area.min(), area.max(), num_bins + 1)
-    # Assign each value to a bin
-    area_bin = np.digitize(area, bins=bin_edges)
-    # Create numpy array with actual value and assigned bin number
-    # area_bin = np.column_stack((area, bin_indices))
-    return area_bin
+# def digitize_area(area):
+#     area = np.array(area)
+#     num_bins = 7
+#     # Calculate bin edges
+#     bin_edges = np.linspace(area.min(), area.max(), num_bins + 1)
+#     # Assign each value to a bin
+#     area_bin = np.digitize(area, bins=bin_edges)
+#     # Create numpy array with actual value and assigned bin number
+#     # area_bin = np.column_stack((area, bin_indices))
+#     return area_bin
 
 
-def digitize_elongation(elongation):
-    elongation = np.array(elongation)
-    num_bins = 7
-    # Calculate bin edges
-    bin_edges = np.linspace(elongation.min(), elongation.max(), num_bins + 1)
-    # Assign each value to a bin
-    elongation_bin = np.digitize(elongation, bins=bin_edges)
-    # Create numpy array with actual value and assigned bin number
-    # elongation_bin = np.column_stack((elongation, bin_indices))
-    return elongation_bin
+def digitize(original_array, num_bins):
+    # Calculate the bin edges using quantiles to ensure equal population in each bin
+    bin_edges = np.quantile(original_array, np.linspace(0, 1, num_bins + 1))
+
+    # Assign each element in the array to a bin
+    bins = np.digitize(original_array, bin_edges[1:], right=True)  # Start from the second edge to avoid bin 0
+
+    # elongation = np.array(elongation)
+    # num_bins = 7
+    # # Calculate bin edges
+    # bin_edges = np.linspace(elongation.min(), elongation.max(), num_bins + 1)
+    # # Assign each value to a bin
+    # elongation_bin = np.digitize(elongation, bins=bin_edges)
+    # # Create numpy array with actual value and assigned bin number
+    # # elongation_bin = np.column_stack((elongation, bin_indices))
+    return bins
 
 
 def one_hot_encode(input_list):
@@ -223,19 +229,36 @@ def main(input_csv, misc_csv, output_csv):
     #     result = process_building(data)
     #     results.append(result)
 
+    # orientation
     cats = pd.DataFrame(one_hot_encode(list(zip(*results))[1]), columns=['or1', 'or2', 'or3', 'or4', 'or5', 'or6',
                                                                          'or7', 'or8'])
-
+    # area
     area = [row[2] for row in results]
-    area_bin = digitize_area(area)
+    area_bin = digitize(area, num_bins=8)
     area_bin = one_hot_encode(area_bin)
     area_bin = pd.DataFrame(area_bin, columns=['ar1', 'ar2', 'ar3', 'ar4', 'ar5', 'ar6', 'ar7', 'ar8'])
     cats = pd.concat([cats, area_bin], axis=1)
+
+    # elongation
     elongation = [row[3] for row in results]
-    elongation_bin = digitize_elongation(elongation)
+    elongation_bin = digitize(elongation, num_bins=8)
     elongation_bin = one_hot_encode(elongation_bin)
     elongation_bin = pd.DataFrame(elongation_bin, columns=['el1', 'el2', 'el3', 'el4', 'el5', 'el6', 'el7', 'el8'])
     cats = pd.concat([cats, elongation_bin], axis=1)
+
+    # WWR
+    temp_csv = pd.read_csv(misc_csv, sep=',')
+    wwr = temp_csv["GlazingRatio"]
+    digi_wwr = digitize(wwr.to_numpy(), num_bins=5)
+    digi_wwr = pd.DataFrame(one_hot_encode(np.transpose(digi_wwr)), columns=['wwr1', 'wwr2', 'wwr3', 'wwr4', 'wwr5'])
+    cats = pd.concat([cats, digi_wwr], axis=1)
+
+    # YoC
+    temp_csv = pd.read_csv(misc_csv, sep=',')
+    yoc = temp_csv["BuildingAge"]
+    digi_yoc = digitize(yoc.to_numpy(), num_bins=5)
+    digi_yoc = pd.DataFrame(one_hot_encode(np.transpose(digi_yoc)), columns=['yoc1', 'yoc2', 'yoc3', 'yoc4', 'yoc5'])
+    cats = pd.concat([cats, digi_yoc], axis=1)
 
     # Write results to CSV
     cats.to_csv(output_csv)

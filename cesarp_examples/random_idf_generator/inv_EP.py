@@ -42,7 +42,7 @@ for i in range(1, 100):
 # file_paths = ['path_to_file1.csv', 'path_to_file2.csv', 'path_to_filem.csv']
 
 # Determine the maximum number of columns in any file
-max_columns = max(pd.read_csv(f, nrows=0).shape[1] for f in file_paths)
+max_columns = 9  # max(pd.read_csv(f, nrows=0).shape[1] for f in file_paths)
 
 # List to hold each reshaped tensor
 tensors = []
