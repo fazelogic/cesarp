@@ -16,6 +16,8 @@ def initiate_random_samples(number_of_buildings):
     preferred_min_height = 3
     preferred_max_height = 19
 
+    # todo: include wind exposure
+
     grid_root = int(np.floor(np.sqrt(number_of_buildings)))
     sample_size = int(np.square(grid_root))
     block_size = int(np.floor(preferred_max_width * 2.5))

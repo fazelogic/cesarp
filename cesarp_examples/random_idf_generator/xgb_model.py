@@ -2,7 +2,7 @@ import os
 import cesarp.common
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
@@ -13,8 +13,10 @@ def __abs_path(path):
 read_path = __abs_path(f"./results/example/final_tensor.npy")
 # Load the input data (tensor) and target labels
 input_tensor = np.load(read_path)  # Shape: [m, n, p, q]
-read_path = __abs_path(f"./results/Categorized_Targets.csv")
+read_path = __abs_path(f"./results/example/Categorized_Targets.csv")
 target = pd.read_csv(read_path).values  # Shape: [q, t]
+target = target[:1000, :]
+
 
 # Reshape the input tensor
 m, n, p, q = input_tensor.shape
@@ -28,13 +30,16 @@ y = target.argmax(axis=1)  # Convert from one-hot to single label (if needed)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Initialize the Gradient Boosting Classifier
-model = GradientBoostingClassifier()
+model = HistGradientBoostingClassifier()
 
 # Train the model
 model.fit(X_train, y_train)
 
 # Predict on the test set
 y_pred = model.predict(X_test)
+
+outputs = pd.DataFrame(y_pred)
+outputs.to_csv('xgboost_outputs.csv')
 
 # Evaluate the accuracy
 accuracy = accuracy_score(y_test, y_pred)

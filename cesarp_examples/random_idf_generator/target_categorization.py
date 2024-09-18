@@ -62,13 +62,13 @@ def compute_orientation_from_edge(longest_edge):
     elif angle_degrees < 157.5:
         orientation_category = 4
     elif angle_degrees < 202.5:
-        orientation_category = 5
+        orientation_category = 1
     elif angle_degrees < 247.5:
-        orientation_category = 6
+        orientation_category = 2
     elif angle_degrees < 292.5:
-        orientation_category = 7
+        orientation_category = 3
     elif angle_degrees < 337.5:
-        orientation_category = 8
+        orientation_category = 4
     else:
         orientation_category = 1
 
@@ -90,7 +90,8 @@ def compute_orientation_from_edge(longest_edge):
 def digitize(original_array, num_bins):
     # Calculate the bin edges using quantiles to ensure equal population in each bin
     bin_edges = np.quantile(original_array, np.linspace(0, 1, num_bins + 1))
-
+    print("elongation")
+    print(bin_edges)
     # Assign each element in the array to a bin
     bins = np.digitize(original_array, bin_edges[1:], right=True)  # Start from the second edge to avoid bin 0
 
@@ -230,8 +231,7 @@ def main(input_csv, misc_csv, output_csv):
     #     results.append(result)
 
     # orientation
-    cats = pd.DataFrame(one_hot_encode(list(zip(*results))[1]), columns=['or1', 'or2', 'or3', 'or4', 'or5', 'or6',
-                                                                         'or7', 'or8'])
+    cats = pd.DataFrame(one_hot_encode(list(zip(*results))[1]), columns=['or1', 'or2', 'or3', 'or4'])
     # area
     area = [row[2] for row in results]
     area_bin = digitize(area, num_bins=8)
@@ -261,7 +261,7 @@ def main(input_csv, misc_csv, output_csv):
     cats = pd.concat([cats, digi_yoc], axis=1)
 
     # Write results to CSV
-    cats.to_csv(output_csv)
+    cats.to_csv(output_csv, index=False)
 
 
 if __name__ == '__main__':
