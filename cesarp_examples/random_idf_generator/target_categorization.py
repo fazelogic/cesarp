@@ -90,8 +90,11 @@ def compute_orientation_from_edge(longest_edge):
 def digitize(original_array, num_bins):
     # Calculate the bin edges using quantiles to ensure equal population in each bin
     bin_edges = np.quantile(original_array, np.linspace(0, 1, num_bins + 1))
-    print("elongation")
-    print(bin_edges)
+
+    # In case you need the bin edges, uncomment below:
+    # print("elongation")
+    # print(bin_edges)
+
     # Assign each element in the array to a bin
     bins = np.digitize(original_array, bin_edges[1:], right=True)  # Start from the second edge to avoid bin 0
 
