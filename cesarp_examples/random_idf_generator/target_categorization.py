@@ -91,7 +91,7 @@ def digitize(original_array, num_bins):
     # Calculate the bin edges using quantiles to ensure equal population in each bin
     bin_edges = np.quantile(original_array, np.linspace(0, 1, num_bins + 1))
 
-    # In case you need the bin edges, uncomment the lines below:
+    # In case you need the bin edges, uncomment the two lines below:
     # print("elongation")
     # print(bin_edges)
 
