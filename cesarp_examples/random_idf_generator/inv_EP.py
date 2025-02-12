@@ -44,7 +44,7 @@ if __name__ == '__main__':
     # List to store data frames
     file_paths = []
 
-    for i in range(10001, 20001):  # 99856 (1,10001) (10001,20001)
+    for i in range(90001, 99857):  # 99856 (1,10001) (10001,20001)
         file_name = __abs_path(f"./results/example/EPF_inputs/fid_{i}.csv")
         file_paths.append(file_name)
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     # Save the final tensor to a binary file using numpy
     # save_path = __abs_path(f"./results/example/final_tensor.npy")
-    save_path = __abs_path(f"./results/example/final_tensor_test.npy")
+    save_path = __abs_path(f"./results/example/final_tensor_90001-99856.npy")
     np.save(save_path, final_tensor)
 
     print("Tensor saved successfully with shape:", final_tensor.shape)
